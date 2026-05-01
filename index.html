@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>مباريات اليوم</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: black;
+      padding: 20px;
+      max-width: 800px;
+      margin: 0 auto;
+      user-select: none;
+    }
+* {
+      -webkit-tap-highlight-color: transparent;
+    }
+    .match-container {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+    .match-button {
+      background: black;
+      color: white;
+      border: 1.75px solid white;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 2px 8px rgba(255, 0, 0, 0.1);
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+      text-align: right;
+    }
+    .match-button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(255, 0, 0, 0.15);
+    }
+    .teams {
+      font-size: 1.2em;
+      font-weight: bold;
+      color: white;
+      margin-bottom: 8px;
+    }
+    .details {
+      display: flex;
+      justify-content: space-between;
+      color: white;
+      font-size: 0.9em;
+    }
+    .channel, .time {
+      color: white;
+      font-weight: 500;
+    }
+    .home-button {
+      position: fixed;
+      bottom: 20px;
+      right: -100px;
+      background: black;
+      border: 4px solid white;
+      color: black;
+      border-radius: 50px;
+      padding: 12px 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+      font-size: 1em;
+      font-weight: bold;
+      animation: slideIn 1s ease-out forwards;
+      z-index: 1000;
+    }
+    .home-button svg {
+      width: 50px;
+      height: 27px;
+      fill: white;
+    }
+    @keyframes slideIn {
+      from { right: -100px; opacity: 0; }
+      to { right: 20px; opacity: 1; }
+    }
+  </style>
+</head>
+<body>
+
+
+
+
+  <div class="match-container" id="matchesContainer"></div>
+
+  <!-- زر الصفحة الرئيسية -->
+  <div class="home-button" onclick="window.location.href='https://varref.github.io/var/'">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+      <path d="M12 3 2 12h3v8h6v-5h2v5h6v-8h3Z"></path>
+    </svg>
+  </div>
+
+  <script>
+    const matches = [
+  // 🇪🇸 الدوري الإسباني
+  { teams: 'رايو فاييكانو × ريال مدريد - الدوري الإسباني', meccaTime: '16:00', channel: 'beIN Sports 3', link: 'go:3' },
+  { teams: 'فالنسيا × ريال بيتيس - الدوري الإسباني', meccaTime: '18:15', channel: 'beIN Sports 5', link: 'go:5' },
+  { teams: 'سيلتا فيغو × خيتافي - الدوري الإسباني', meccaTime: '20:30', channel: 'beIN Sports 5', link: 'go:5' },
+  { teams: 'ريال سوسيداد × أتلتيك بلباو - الدوري الإسباني', meccaTime: '23:00', channel: 'beIN Sports 5', link: 'go:5' },
+  
+  // 🇮🇹 الدوري الإيطالي
+  { teams: 'ليتشي × تورينو - الدوري الإيطالي', meccaTime: '14:30', channel: 'STARZPLAY', link: 'go:10' },
+  { teams: 'أتالانتا × كومو - الدوري الإيطالي', meccaTime: '17:00', channel: 'STARZPLAY', link: 'go:10' },
+  { teams: 'إنتر ميلان × كريمونيزي - الدوري الإيطالي', meccaTime: '20:00', channel: 'STARZPLAY', link: 'go:10' },
+  { teams: 'يوفنتوس × بارما - الدوري الإيطالي', meccaTime: '22:45', channel: 'STARZPLAY', link: 'go:10' },
+  
+  // 🏴 الدوري الإنجليزي
+  { teams: 'فولهام × مانشستر يونايتد - الدوري الإنجليزي', meccaTime: '17:00', channel: 'beIN Sports 1', link: 'go:1' },
+  { teams: 'برينتفورد × أستون فيلا - الدوري الإنجليزي', meccaTime: '17:00', channel: 'beIN Sports 4', link: 'go:4' },
+  { teams: 'كريستال بالاس × نوتينغهام فورست - الدوري الإنجليزي', meccaTime: '17:00', channel: 'beIN Sports 8', link: 'go:8' },
+  { teams: 'مانشستر سيتي × توتنهام - الدوري الإنجليزي', meccaTime: '19:30', channel: 'beIN Sports 1', link: 'go:1' },
+  
+  // 🇫🇷 الدوري الفرنسي
+  { teams: 'ليل × ليون - الدوري الفرنسي', meccaTime: '17:00', channel: 'beIN Sports 6', link: 'go:6' },
+  { teams: 'بريست × نيس - الدوري الفرنسي', meccaTime: '19:15', channel: 'beIN Sports 4', link: 'go:4' },
+  { teams: 'ميتز × أنجيه - الدوري الفرنسي', meccaTime: '19:15', channel: 'beIN Sports 6', link: 'go:6' },
+  { teams: 'أوكسير × تولوز - الدوري الفرنسي', meccaTime: '19:15', channel: 'beIN Sports 8', link: 'go:8' },
+  { teams: 'باريس سان جيرمان × ستراسبورغ - الدوري الفرنسي', meccaTime: '22:45', channel: 'beIN Sports 1', link: 'go:1' },
+  
+  // 🇩🇪 الدوري الألماني
+  
+  { teams: 'هايدنهايم × بوروسيا دورتموند - الدوري الألماني', meccaTime: '19:30', channel: 'MBC Action', link: 'go:Mb' },
+  
+  // 🇸🇦 الدوري السعودي
+  { teams: 'الشباب × الفيحاء - الدوري السعودي', meccaTime: '18:15', channel: 'THMANIAH', link: 'go:T1' },
+  { teams: 'الفتح × الحزم - الدوري السعودي', meccaTime: '20:30', channel: 'THMANIAH', link: 'go:T2' },
+  { teams: 'الاتحاد × النجمة - الدوري السعودي', meccaTime: '20:30', channel: 'THMANIAH', link: 'go:T3' }
+]
+
+    let userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
+    fetch('https://ipapi.co/json/')
+      .then(response => response.json())
+      .then(data => {
+        if (data && data.timezone) userTimezone = data.timezone;
+        createMatchElements();
+      })
+      .catch(() => createMatchElements());
+
+    function convertToLocalTime(meccaTime) {
+      const [hours, minutes] = meccaTime.split(':');
+      const baseDate = getMatchDate(meccaTime);
+      return baseDate.toLocaleTimeString('ar-AR', {
+        timeZone: userTimezone,
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: true
+      });
+    }
+
+    function getMatchDate(meccaTime) {
+      const [hours, minutes] = meccaTime.split(':').map(Number);
+      const now = new Date();
+      let date = new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate(), hours - 3, minutes)); // Mecca = UTC+3
+      if (hours < 6) date.setDate(date.getDate() + 1); // اعتبر مباريات الفجر لمباريات الغد
+      return date;
+    }
+
+    function createMatchElements() {
+      const container = document.getElementById('matchesContainer');
+      const now = new Date();
+      const upcoming = [], live = [], ended = [];
+
+      matches.forEach(match => {
+        const matchStart = getMatchDate(match.meccaTime);
+        const matchEnd = new Date(matchStart.getTime() + 2 * 60 * 60 * 1000);
+        if (now >= matchStart && now < matchEnd) {
+          live.push(match);
+        } else if (now >= matchEnd) {
+          ended.push(match);
+        } else {
+          upcoming.push(match);
+        }
+      });
+
+      const sortByDate = arr => arr.sort((a, b) => getMatchDate(a.meccaTime) - getMatchDate(b.meccaTime));
+      const allMatches = [...sortByDate(live), ...sortByDate(upcoming), ...sortByDate(ended)];
+
+      allMatches.forEach(match => {
+        const button = document.createElement('button');
+        button.className = 'match-button';
+        const matchStart = getMatchDate(match.meccaTime);
+        const matchEnd = new Date(matchStart.getTime() + 2 * 60 * 60 * 1000);
+        const now = new Date();
+
+        let displayTime = `🕒 ${convertToLocalTime(match.meccaTime)} (توقيتك المحلي)`;
+        if (now >= matchStart && now < matchEnd) displayTime = 'جارية الآن';
+        else if (now >= matchEnd) displayTime = 'إنتهت المباراة';
+
+        button.innerHTML = `
+          <div class="teams">${match.teams}</div>
+          <div class="details">
+            <span class="time">${displayTime}</span>
+            <span class="channel">
+              <svg xmlns="http://www.w3.org/2000/svg" height="14" viewBox="0 0 24 24" fill="white" style="vertical-align: middle; margin-left: 4px;">
+                <path d="M21 17H3V5h18m0-2H3c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h6l-2 2v1h10v-1l-2-2h6c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z"></path>
+              </svg>
+              ${match.channel}
+            </span>
+          </div>
+        `;
+        button.addEventListener('click', () => window.location.href = match.link);
+        container.appendChild(button);
+      });
+    }
+
+    setInterval(() => {
+      const now = new Date();
+      document.querySelectorAll('.match-button').forEach((button, index) => {
+        const match = matches[index];
+        const matchStart = getMatchDate(match.meccaTime);
+        const matchEnd = new Date(matchStart.getTime() + 2 * 60 * 60 * 1000);
+        let displayTime = `🕒 ${convertToLocalTime(match.meccaTime)} (توقيتك المحلي)`;
+        if (now >= matchStart && now < matchEnd) displayTime = 'جارية الآن';
+        else if (now >= matchEnd) displayTime = 'إنتهت المباراة';
+        button.querySelector('.time').textContent = displayTime;
+      });
+    }, 60000);
+
+    document.addEventListener('contextmenu', e => e.preventDefault());
+    document.addEventListener('copy', e => e.preventDefault());
+    document.addEventListener('selectstart', e => e.preventDefault());
+  </script>
+</body>
+</html>
