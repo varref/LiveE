@@ -14,18 +14,7 @@
       user-select: none;
     }
 
-    body {
-  opacity: 0;
-  transition: opacity 0.5s ease;
-}
-
-body.fade-in {
-  opacity: 1;
-}
-
-body.fade-out {
-  opacity: 0;
-}
+    
     
 * {
       -webkit-tap-highlight-color: transparent;
@@ -243,23 +232,7 @@ window.addEventListener("DOMContentLoaded", () => {
 });
 
 // عند الضغط على أي رابط (Fade Out)
-document.querySelectorAll("a").forEach(link => {
-  link.addEventListener("click", function(e) {
-    const href = this.getAttribute("href");
 
-    // تجاهل الروابط الفارغة أو نفس الصفحة
-    if (!href || href.startsWith("#") || this.target === "_blank") return;
-
-    e.preventDefault();
-
-    document.body.classList.remove("fade-in");
-    document.body.classList.add("fade-out");
-
-    setTimeout(() => {
-      window.location.href = href;
-    }, 1500); // نفس مدة transition
-  });
-});
 
     document.addEventListener('contextmenu', e => e.preventDefault());
     document.addEventListener('copy', e => e.preventDefault());
