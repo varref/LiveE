@@ -5,6 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>مباريات اليوم</title>
   <style>
+/* إخفاء الصفحة في البداية */
+body {
+  opacity: 0;
+  transition: opacity 1.5s ease;
+}
+
+    
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       background-color: black;
@@ -225,7 +232,10 @@
         button.querySelector('.time').textContent = displayTime;
       });
     }, 60000);
-
+    
+window.addEventListener("load", function () {
+  document.body.style.opacity = "1";
+});
  
 
 
