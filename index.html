@@ -5,13 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>مباريات اليوم</title>
   <style>
-/* إخفاء الصفحة في البداية */
-body {
-  opacity: 0;
-  transition: opacity 1.5s ease;
-}
+    /* إخفاء الصفحة في البداية */
+    body {
+      opacity: 0;
+      transition: opacity 1.5s ease;
+    }
 
-    
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       background-color: black;
@@ -21,16 +20,16 @@ body {
       user-select: none;
     }
 
-    
-    
-* {
+    * {
       -webkit-tap-highlight-color: transparent;
     }
+
     .match-container {
       display: flex;
       flex-direction: column;
       gap: 15px;
     }
+
     .match-button {
       background: black;
       color: white;
@@ -42,106 +41,135 @@ body {
       transition: transform 0.2s, box-shadow 0.2s;
       text-align: right;
     }
+
     .match-button:hover {
       transform: translateY(-2px);
       box-shadow: 0 4px 12px rgba(255, 0, 0, 0.15);
     }
+
     .teams {
       font-size: 1.2em;
       font-weight: bold;
       color: white;
       margin-bottom: 8px;
     }
+
     .details {
       display: flex;
       justify-content: space-between;
       color: white;
       font-size: 0.9em;
     }
+
     .channel, .time {
       color: white;
       font-weight: 500;
     }
+
+    /* ===== زر الصفحة الرئيسية (النمط الجديد) ===== */
     .home-button {
       position: fixed;
-      bottom: 20px;
-      right: -100px;
-      background: black;
-      border: 4px solid white;
-      color: black;
-      border-radius: 50px;
+      bottom: 24px;
+      right: 24px;
+      background: #0f0f0f;
+      border: 1.8px solid #ffffff;
+      border-radius: 60px;
       padding: 12px 20px;
       display: flex;
       align-items: center;
-      gap: 10px;
+      justify-content: center;
       cursor: pointer;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-      font-size: 1em;
-      font-weight: bold;
-      animation: slideIn 1s ease-out forwards;
-      z-index: 1000;
+      box-shadow: 0 8px 18px rgba(0, 0, 0, 0.6);
+      z-index: 1100;
+      transition: all 0.25s ease;
+      backdrop-filter: blur(4px);
+      background-color: rgba(10, 10, 10, 0.85);
     }
+
+    .home-button:hover {
+      background: #1f1f1f;
+      border-color: #fff;
+      transform: scale(1.02);
+      box-shadow: 0 10px 24px black;
+    }
+
     .home-button svg {
-      width: 50px;
-      height: 27px;
+      width: 26px;
+      height: 26px;
       fill: white;
+      transition: transform 0.2s;
     }
-    @keyframes slideIn {
-      from { right: -100px; opacity: 0; }
-      to { right: 20px; opacity: 1; }
+
+    .home-button:active svg {
+      transform: scale(0.94);
+    }
+
+    /* تحسينات للشاشات الصغيرة */
+    @media (max-width: 540px) {
+      .home-button {
+        bottom: 16px;
+        right: 16px;
+        padding: 8px 16px;
+      }
+      .home-button svg {
+        width: 22px;
+        height: 22px;
+      }
+      .match-button {
+        padding: 14px;
+      }
+      .teams {
+        font-size: 1em;
+      }
     }
   </style>
 </head>
 <body>
 
-
-
-
   <div class="match-container" id="matchesContainer"></div>
 
-  <!-- زر الصفحة الرئيسية -->
-  <div class="home-button" onclick="window.location.href='https://varref.github.io/var/'">
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+  <!-- زر الصفحة الرئيسية (النمط الجديد) -->
+  <div class="home-button" onclick="window.location.href='https://varref.github.io/var/'" aria-label="الصفحة الرئيسية">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
       <path d="M12 3 2 12h3v8h6v-5h2v5h6v-8h3Z"></path>
     </svg>
   </div>
 
   <script>
     const matches = [
-  // 🇪🇸 الدوري الإسباني
-  { teams: 'رايو فاييكانو × ريال مدريد - الدوري الإسباني', meccaTime: '16:00', channel: 'beIN Sports 3', link: 'go:3' },
-  { teams: 'فالنسيا × ريال بيتيس - الدوري الإسباني', meccaTime: '18:15', channel: 'beIN Sports 5', link: 'go:5' },
-  { teams: 'سيلتا فيغو × خيتافي - الدوري الإسباني', meccaTime: '20:30', channel: 'beIN Sports 5', link: 'go:5' },
-  { teams: 'ريال سوسيداد × أتلتيك بلباو - الدوري الإسباني', meccaTime: '23:00', channel: 'beIN Sports 5', link: 'go:5' },
-  
-  // 🇮🇹 الدوري الإيطالي
-  { teams: 'ليتشي × تورينو - الدوري الإيطالي', meccaTime: '14:30', channel: 'STARZPLAY', link: 'go:10' },
-  { teams: 'أتالانتا × كومو - الدوري الإيطالي', meccaTime: '17:00', channel: 'STARZPLAY', link: 'go:10' },
-  { teams: 'إنتر ميلان × كريمونيزي - الدوري الإيطالي', meccaTime: '20:00', channel: 'STARZPLAY', link: 'go:10' },
-  { teams: 'يوفنتوس × بارما - الدوري الإيطالي', meccaTime: '22:45', channel: 'STARZPLAY', link: 'go:10' },
-  
-  // 🏴 الدوري الإنجليزي
-  { teams: 'فولهام × مانشستر يونايتد - الدوري الإنجليزي', meccaTime: '17:00', channel: 'beIN Sports 1', link: 'go:1' },
-  { teams: 'برينتفورد × أستون فيلا - الدوري الإنجليزي', meccaTime: '17:00', channel: 'beIN Sports 4', link: 'go:4' },
-  { teams: 'كريستال بالاس × نوتينغهام فورست - الدوري الإنجليزي', meccaTime: '17:00', channel: 'beIN Sports 8', link: 'go:8' },
-  { teams: 'مانشستر سيتي × توتنهام - الدوري الإنجليزي', meccaTime: '19:30', channel: 'beIN Sports 1', link: 'go:1' },
-  
-  // 🇫🇷 الدوري الفرنسي
-  { teams: 'ليل × ليون - الدوري الفرنسي', meccaTime: '17:00', channel: 'beIN Sports 6', link: 'go:6' },
-  { teams: 'بريست × نيس - الدوري الفرنسي', meccaTime: '19:15', channel: 'beIN Sports 4', link: 'go:4' },
-  { teams: 'ميتز × أنجيه - الدوري الفرنسي', meccaTime: '19:15', channel: 'beIN Sports 6', link: 'go:6' },
-  { teams: 'أوكسير × تولوز - الدوري الفرنسي', meccaTime: '19:15', channel: 'beIN Sports 8', link: 'go:8' },
-  { teams: 'باريس سان جيرمان × ستراسبورغ - الدوري الفرنسي', meccaTime: '22:45', channel: 'beIN Sports 1', link: 'go:1' },
-  
-  // 🇩🇪 الدوري الألماني
-  
-  { teams: 'هايدنهايم × بوروسيا دورتموند - الدوري الألماني', meccaTime: '19:30', channel: 'MBC Action', link: 'go:Mb' },
-  
-  // 🇸🇦 الدوري السعودي
-  { teams: 'الشباب × الفيحاء - الدوري السعودي', meccaTime: '18:15', channel: 'THMANIAH', link: 'go:T1' },
-  { teams: 'الفتح × الحزم - الدوري السعودي', meccaTime: '20:30', channel: 'THMANIAH', link: 'go:T2' },
-  { teams: 'الاتحاد × النجمة - الدوري السعودي', meccaTime: '20:30', channel: 'THMANIAH', link: 'go:T3' }
-]
+      // 🇪🇸 الدوري الإسباني
+      { teams: 'رايو فاييكانو × ريال مدريد - الدوري الإسباني', meccaTime: '16:00', channel: 'beIN Sports 3', link: 'go:3' },
+      { teams: 'فالنسيا × ريال بيتيس - الدوري الإسباني', meccaTime: '18:15', channel: 'beIN Sports 5', link: 'go:5' },
+      { teams: 'سيلتا فيغو × خيتافي - الدوري الإسباني', meccaTime: '20:30', channel: 'beIN Sports 5', link: 'go:5' },
+      { teams: 'ريال سوسيداد × أتلتيك بلباو - الدوري الإسباني', meccaTime: '23:00', channel: 'beIN Sports 5', link: 'go:5' },
+      
+      // 🇮🇹 الدوري الإيطالي
+      { teams: 'ليتشي × تورينو - الدوري الإيطالي', meccaTime: '14:30', channel: 'STARZPLAY', link: 'go:10' },
+      { teams: 'أتالانتا × كومو - الدوري الإيطالي', meccaTime: '17:00', channel: 'STARZPLAY', link: 'go:10' },
+      { teams: 'إنتر ميلان × كريمونيزي - الدوري الإيطالي', meccaTime: '20:00', channel: 'STARZPLAY', link: 'go:10' },
+      { teams: 'يوفنتوس × بارما - الدوري الإيطالي', meccaTime: '22:45', channel: 'STARZPLAY', link: 'go:10' },
+      
+      // 🏴 الدوري الإنجليزي
+      { teams: 'فولهام × مانشستر يونايتد - الدوري الإنجليزي', meccaTime: '17:00', channel: 'beIN Sports 1', link: 'go:1' },
+      { teams: 'برينتفورد × أستون فيلا - الدوري الإنجليزي', meccaTime: '17:00', channel: 'beIN Sports 4', link: 'go:4' },
+      { teams: 'كريستال بالاس × نوتينغهام فورست - الدوري الإنجليزي', meccaTime: '17:00', channel: 'beIN Sports 8', link: 'go:8' },
+      { teams: 'مانشستر سيتي × توتنهام - الدوري الإنجليزي', meccaTime: '19:30', channel: 'beIN Sports 1', link: 'go:1' },
+      
+      // 🇫🇷 الدوري الفرنسي
+      { teams: 'ليل × ليون - الدوري الفرنسي', meccaTime: '17:00', channel: 'beIN Sports 6', link: 'go:6' },
+      { teams: 'بريست × نيس - الدوري الفرنسي', meccaTime: '19:15', channel: 'beIN Sports 4', link: 'go:4' },
+      { teams: 'ميتز × أنجيه - الدوري الفرنسي', meccaTime: '19:15', channel: 'beIN Sports 6', link: 'go:6' },
+      { teams: 'أوكسير × تولوز - الدوري الفرنسي', meccaTime: '19:15', channel: 'beIN Sports 8', link: 'go:8' },
+      { teams: 'باريس سان جيرمان × ستراسبورغ - الدوري الفرنسي', meccaTime: '22:45', channel: 'beIN Sports 1', link: 'go:1' },
+      
+      // 🇩🇪 الدوري الألماني
+      { teams: 'هايدنهايم × بوروسيا دورتموند - الدوري الألماني', meccaTime: '19:30', channel: 'MBC Action', link: 'go:Mb' },
+      
+      // 🇸🇦 الدوري السعودي
+      { teams: 'الشباب × الفيحاء - الدوري السعودي', meccaTime: '18:15', channel: 'THMANIAH', link: 'go:T1' },
+      { teams: 'الفتح × الحزم - الدوري السعودي', meccaTime: '20:30', channel: 'THMANIAH', link: 'go:T2' },
+      { teams: 'الاتحاد × النجمة - الدوري السعودي', meccaTime: '20:30', channel: 'THMANIAH', link: 'go:T3' }
+    ];
 
     let userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
@@ -168,7 +196,7 @@ body {
       const [hours, minutes] = meccaTime.split(':').map(Number);
       const now = new Date();
       let date = new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate(), hours - 3, minutes)); // Mecca = UTC+3
-      if (hours < 6) date.setDate(date.getDate() + 1); // اعتبر مباريات الفجر لمباريات الغد
+      if (hours < 6) date.setDate(date.getDate() + 1);
       return date;
     }
 
@@ -232,12 +260,10 @@ body {
         button.querySelector('.time').textContent = displayTime;
       });
     }, 60000);
-    
-window.addEventListener("load", function () {
-  document.body.style.opacity = "1";
-});
- 
 
+    window.addEventListener("load", function () {
+      document.body.style.opacity = "1";
+    });
 
     document.addEventListener('contextmenu', e => e.preventDefault());
     document.addEventListener('copy', e => e.preventDefault());
