@@ -1,273 +1,506 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>مباريات اليوم</title>
-  <style>
-    /* إخفاء الصفحة في البداية */
-    body {
-      opacity: 0;
-      transition: opacity 1.5s ease;
-    }
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>مباريات اليوم</title>
+    <style>
+        /* ===== RESET & BASE ===== */
+        *,
+        *::before,
+        *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-    body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background-color: black;
-      padding: 20px;
-      max-width: 800px;
-      margin: 0 auto;
-      user-select: none;
-    }
+        body {
+            opacity: 0;
+            transition: opacity 1.2s ease;
+            font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background-color: #0b0b0b;
+            padding: 24px 16px 100px 16px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            user-select: none;
+        }
 
-    * {
-      -webkit-tap-highlight-color: transparent;
-    }
+        /* ===== SCROLLBAR ===== */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #141414;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #3a3a3a;
+            border-radius: 12px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
 
-    .match-container {
-      display: flex;
-      flex-direction: column;
-      gap: 15px;
-    }
+        /* ===== MATCH CONTAINER ===== */
+        .match-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 16px;
+            width: 100%;
+            max-width: 560px;
+            margin: 0 auto;
+        }
 
-    .match-button {
-      background: black;
-      color: white;
-      border: 1.75px solid white;
-      border-radius: 12px;
-      padding: 20px;
-      box-shadow: 0 2px 8px rgba(255, 0, 0, 0.1);
-      cursor: pointer;
-      transition: transform 0.2s, box-shadow 0.2s;
-      text-align: right;
-    }
+        /* ===== MATCH CARD ===== */
+        .match-button {
+            background: #121212;
+            color: #f0f0f0;
+            border: 1px solid #2a2a2a;
+            border-radius: 16px;
+            padding: 22px 24px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            text-align: right;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(2px);
+            width: 100%;
+            margin: 0 auto;
+        }
 
-    .match-button:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(255, 0, 0, 0.15);
-    }
+        .match-button::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: 16px;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0.01));
+            opacity: 0;
+            transition: opacity 0.4s ease;
+            pointer-events: none;
+        }
 
-    .teams {
-      font-size: 1.2em;
-      font-weight: bold;
-      color: white;
-      margin-bottom: 8px;
-    }
+        .match-button:hover::before {
+            opacity: 1;
+        }
 
-    .details {
-      display: flex;
-      justify-content: space-between;
-      color: white;
-      font-size: 0.9em;
-    }
+        .match-button:hover {
+            transform: translateY(-3px);
+            border-color: #555;
+            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(255, 255, 255, 0.04);
+            background: #181818;
+        }
 
-    .channel, .time {
-      color: white;
-      font-weight: 500;
-    }
+        .match-button:active {
+            transform: scale(0.98);
+            transition-duration: 0.08s;
+        }
 
-    /* ===== زر الصفحة الرئيسية (النمط الجديد) ===== */
-    .home-button {
-      position: fixed;
-      bottom: 24px;
-      right: 24px;
-      background: #0f0f0f;
-      border: 1.8px solid #ffffff;
-      border-radius: 60px;
-      padding: 12px 20px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      box-shadow: 0 8px 18px rgba(0, 0, 0, 0.6);
-      z-index: 1100;
-      transition: all 0.25s ease;
-      backdrop-filter: blur(4px);
-      background-color: rgba(10, 10, 10, 0.85);
-    }
+        /* ===== TEAMS ===== */
+        .teams {
+            font-size: 1.15rem;
+            font-weight: 600;
+            color: #ffffff;
+            margin-bottom: 10px;
+            letter-spacing: -0.2px;
+            line-height: 1.4;
+        }
 
-    .home-button:hover {
-      background: #1f1f1f;
-      border-color: #fff;
-      transform: scale(1.02);
-      box-shadow: 0 10px 24px black;
-    }
+        /* ===== DETAILS ROW ===== */
+        .details {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px 12px;
+            font-size: 0.9rem;
+            color: #b0b0b0;
+        }
 
-    .home-button svg {
-      width: 26px;
-      height: 26px;
-      fill: white;
-      transition: transform 0.2s;
-    }
+        .time {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-weight: 450;
+            color: #c0c0c0;
+            background: rgba(255, 255, 255, 0.04);
+            padding: 4px 12px 4px 14px;
+            border-radius: 40px;
+            border: 1px solid #262626;
+            font-size: 0.82rem;
+            letter-spacing: 0.2px;
+        }
 
-    .home-button:active svg {
-      transform: scale(0.94);
-    }
+        .time.live {
+            color: #ffffff;
+            border-color: #555;
+            background: rgba(255, 255, 255, 0.07);
+            font-weight: 500;
+        }
 
-    /* تحسينات للشاشات الصغيرة */
-    @media (max-width: 540px) {
-      .home-button {
-        bottom: 16px;
-        right: 16px;
-        padding: 8px 16px;
-      }
-      .home-button svg {
-        width: 22px;
-        height: 22px;
-      }
-      .match-button {
-        padding: 14px;
-      }
-      .teams {
-        font-size: 1em;
-      }
-    }
-  </style>
+        .time.live::before {
+            content: '';
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #ffffff;
+            animation: pulse-dot 1.4s ease-in-out infinite;
+            margin-left: 6px;
+        }
+
+        @keyframes pulse-dot {
+            0%,
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+            50% {
+                opacity: 0.25;
+                transform: scale(0.6);
+            }
+        }
+
+        .time.ended {
+            color: #666;
+            border-color: #222;
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .channel {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-weight: 450;
+            color: #b8b8b8;
+            background: rgba(255, 255, 255, 0.03);
+            padding: 4px 14px 4px 16px;
+            border-radius: 40px;
+            border: 1px solid #262626;
+            font-size: 0.82rem;
+        }
+
+        .channel svg {
+            fill: #a0a0a0;
+            width: 15px;
+            height: 15px;
+            transition: fill 0.2s;
+        }
+
+        .match-button:hover .channel svg {
+            fill: #d0d0d0;
+        }
+
+        /* ===== DIVIDER ===== */
+        .match-divider {
+            width: 70%;
+            max-width: 400px;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, #2a2a2a, transparent);
+            margin: 4px auto 6px auto;
+        }
+
+        /* ===== HOME BUTTON ===== */
+        .home-button {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            background: #0f0f0f;
+            border: 1.8px solid #ffffff;
+            border-radius: 60px;
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 8px 18px rgba(0, 0, 0, 0.6);
+            z-index: 1100;
+            transition: all 0.25s ease;
+            background-color: rgba(10, 10, 10, 0.9);
+        }
+
+        .home-button:hover {
+            background: #1f1f1f;
+            border-color: #fff;
+            transform: scale(1.02);
+            box-shadow: 0 10px 24px black;
+        }
+
+        .home-button:active {
+            transform: scale(0.94);
+        }
+
+        .home-button svg {
+            width: 26px;
+            height: 26px;
+            fill: white;
+            transition: transform 0.2s;
+        }
+
+        .home-button:active svg {
+            transform: scale(0.94);
+        }
+
+        /* ===== EMPTY STATE ===== */
+        .empty-state {
+            color: #555;
+            text-align: center;
+            padding: 48px 20px;
+            font-size: 0.95rem;
+            border: 1px dashed #2a2a2a;
+            border-radius: 20px;
+            background: #0f0f0f;
+            width: 100%;
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 640px) {
+            body {
+                padding: 16px 12px 90px 12px;
+            }
+
+            .match-container {
+                max-width: 100%;
+                padding: 0 8px;
+            }
+
+            .match-button {
+                padding: 18px 18px;
+                border-radius: 14px;
+            }
+
+            .teams {
+                font-size: 1rem;
+                margin-bottom: 8px;
+            }
+
+            .details {
+                font-size: 0.78rem;
+                gap: 6px;
+            }
+
+            .time,
+            .channel {
+                padding: 3px 10px 3px 12px;
+                font-size: 0.72rem;
+            }
+
+            .home-button {
+                bottom: 16px;
+                right: 16px;
+                padding: 8px 16px;
+            }
+            .home-button svg {
+                width: 22px;
+                height: 22px;
+            }
+
+            .match-divider {
+                width: 80%;
+            }
+        }
+
+        @media (max-width: 420px) {
+            .details {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 6px;
+            }
+            .time,
+            .channel {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+
+        /* ===== FADE-IN ===== */
+        body.loaded {
+            opacity: 1;
+        }
+
+        /* ===== UTILITY ===== */
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            border: 0;
+        }
+
+        * {
+            -webkit-tap-highlight-color: transparent;
+        }
+    </style>
 </head>
 <body>
 
-  <div class="match-container" id="matchesContainer"></div>
+    <!-- MATCHES CONTAINER -->
+    <div class="match-container" id="matchesContainer"></div>
 
-  <!-- زر الصفحة الرئيسية (النمط الجديد) -->
-  <div class="home-button" onclick="window.location.href='https://varref.github.io/var/'" aria-label="الصفحة الرئيسية">
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
-      <path d="M12 3 2 12h3v8h6v-5h2v5h6v-8h3Z"></path>
-    </svg>
-  </div>
+    <!-- HOME BUTTON -->
+    <div class="home-button" onclick="window.location.href='https://varref.github.io/var/'" aria-label="الصفحة الرئيسية">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
+            <path d="M12 3 2 12h3v8h6v-5h2v5h6v-8h3Z" />
+        </svg>
+    </div>
 
-  <script>
-    const matches = [
-      // 🇪🇸 الدوري الإسباني
-      { teams: 'رايو فاييكانو × ريال مدريد - الدوري الإسباني', meccaTime: '16:00', channel: 'beIN Sports 3', link: 'go:3' },
-      { teams: 'فالنسيا × ريال بيتيس - الدوري الإسباني', meccaTime: '18:15', channel: 'beIN Sports 5', link: 'go:5' },
-      { teams: 'سيلتا فيغو × خيتافي - الدوري الإسباني', meccaTime: '20:30', channel: 'beIN Sports 5', link: 'go:5' },
-      { teams: 'ريال سوسيداد × أتلتيك بلباو - الدوري الإسباني', meccaTime: '23:00', channel: 'beIN Sports 5', link: 'go:5' },
-      
-      // 🇮🇹 الدوري الإيطالي
-      { teams: 'ليتشي × تورينو - الدوري الإيطالي', meccaTime: '14:30', channel: 'STARZPLAY', link: 'go:10' },
-      { teams: 'أتالانتا × كومو - الدوري الإيطالي', meccaTime: '17:00', channel: 'STARZPLAY', link: 'go:10' },
-      { teams: 'إنتر ميلان × كريمونيزي - الدوري الإيطالي', meccaTime: '20:00', channel: 'STARZPLAY', link: 'go:10' },
-      { teams: 'يوفنتوس × بارما - الدوري الإيطالي', meccaTime: '22:45', channel: 'STARZPLAY', link: 'go:10' },
-      
-      // 🏴 الدوري الإنجليزي
-      { teams: 'فولهام × مانشستر يونايتد - الدوري الإنجليزي', meccaTime: '17:00', channel: 'beIN Sports 1', link: 'go:1' },
-      { teams: 'برينتفورد × أستون فيلا - الدوري الإنجليزي', meccaTime: '17:00', channel: 'beIN Sports 4', link: 'go:4' },
-      { teams: 'كريستال بالاس × نوتينغهام فورست - الدوري الإنجليزي', meccaTime: '17:00', channel: 'beIN Sports 8', link: 'go:8' },
-      { teams: 'مانشستر سيتي × توتنهام - الدوري الإنجليزي', meccaTime: '19:30', channel: 'beIN Sports 1', link: 'go:1' },
-      
-      // 🇫🇷 الدوري الفرنسي
-      { teams: 'ليل × ليون - الدوري الفرنسي', meccaTime: '17:00', channel: 'beIN Sports 6', link: 'go:6' },
-      { teams: 'بريست × نيس - الدوري الفرنسي', meccaTime: '19:15', channel: 'beIN Sports 4', link: 'go:4' },
-      { teams: 'ميتز × أنجيه - الدوري الفرنسي', meccaTime: '19:15', channel: 'beIN Sports 6', link: 'go:6' },
-      { teams: 'أوكسير × تولوز - الدوري الفرنسي', meccaTime: '19:15', channel: 'beIN Sports 8', link: 'go:8' },
-      { teams: 'باريس سان جيرمان × ستراسبورغ - الدوري الفرنسي', meccaTime: '22:45', channel: 'beIN Sports 1', link: 'go:1' },
-      
-      // 🇩🇪 الدوري الألماني
-      { teams: 'هايدنهايم × بوروسيا دورتموند - الدوري الألماني', meccaTime: '19:30', channel: 'MBC Action', link: 'go:Mb' },
-      
-      // 🇸🇦 الدوري السعودي
-      { teams: 'الشباب × الفيحاء - الدوري السعودي', meccaTime: '18:15', channel: 'THMANIAH', link: 'go:T1' },
-      { teams: 'الفتح × الحزم - الدوري السعودي', meccaTime: '20:30', channel: 'THMANIAH', link: 'go:T2' },
-      { teams: 'الاتحاد × النجمة - الدوري السعودي', meccaTime: '20:30', channel: 'THMANIAH', link: 'go:T3' }
-    ];
-
-    let userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-
-    fetch('https://ipapi.co/json/')
-      .then(response => response.json())
-      .then(data => {
-        if (data && data.timezone) userTimezone = data.timezone;
-        createMatchElements();
-      })
-      .catch(() => createMatchElements());
-
-    function convertToLocalTime(meccaTime) {
-      const [hours, minutes] = meccaTime.split(':');
-      const baseDate = getMatchDate(meccaTime);
-      return baseDate.toLocaleTimeString('ar-AR', {
-        timeZone: userTimezone,
-        hour: '2-digit',
-        minute: '2-digit',
-        hour12: true
-      });
-    }
-
-    function getMatchDate(meccaTime) {
-      const [hours, minutes] = meccaTime.split(':').map(Number);
-      const now = new Date();
-      let date = new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate(), hours - 3, minutes)); // Mecca = UTC+3
-      if (hours < 6) date.setDate(date.getDate() + 1);
-      return date;
-    }
-
-    function createMatchElements() {
-      const container = document.getElementById('matchesContainer');
-      const now = new Date();
-      const upcoming = [], live = [], ended = [];
-
-      matches.forEach(match => {
-        const matchStart = getMatchDate(match.meccaTime);
-        const matchEnd = new Date(matchStart.getTime() + 2 * 60 * 60 * 1000);
-        if (now >= matchStart && now < matchEnd) {
-          live.push(match);
-        } else if (now >= matchEnd) {
-          ended.push(match);
-        } else {
-          upcoming.push(match);
+    <script>
+        // ===== MATCH DATA =====
+        const matches = [{
+            teams: 'برمنجهام × برشلونة - مباراة ودية',
+            meccaTime: '21:45',
+            channel: 'الشارقة الرياضية',
+            link: 'http://xlion.net:8080/15034094901029/18800196589372/141797'
         }
-      });
+        ];
 
-      const sortByDate = arr => arr.sort((a, b) => getMatchDate(a.meccaTime) - getMatchDate(b.meccaTime));
-      const allMatches = [...sortByDate(live), ...sortByDate(upcoming), ...sortByDate(ended)];
+        // ===== TIMEZONE DETECTION =====
+        let userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
-      allMatches.forEach(match => {
-        const button = document.createElement('button');
-        button.className = 'match-button';
-        const matchStart = getMatchDate(match.meccaTime);
-        const matchEnd = new Date(matchStart.getTime() + 2 * 60 * 60 * 1000);
-        const now = new Date();
+        fetch('https://ipapi.co/json/')
+            .then(response => response.json())
+            .then(data => {
+                if (data && data.timezone) userTimezone = data.timezone;
+                createMatchElements();
+            })
+            .catch(() => createMatchElements());
 
-        let displayTime = `🕒 ${convertToLocalTime(match.meccaTime)} (توقيتك المحلي)`;
-        if (now >= matchStart && now < matchEnd) displayTime = 'جارية الآن';
-        else if (now >= matchEnd) displayTime = 'إنتهت المباراة';
+        // ===== HELPERS =====
+        function getMatchDate(meccaTime) {
+            const [hours, minutes] = meccaTime.split(':').map(Number);
+            const now = new Date();
+            let date = new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate(), hours - 3, minutes));
+            if (hours < 6) date.setDate(date.getDate() + 1);
+            return date;
+        }
 
-        button.innerHTML = `
-          <div class="teams">${match.teams}</div>
-          <div class="details">
-            <span class="time">${displayTime}</span>
-            <span class="channel">
-              <svg xmlns="http://www.w3.org/2000/svg" height="14" viewBox="0 0 24 24" fill="white" style="vertical-align: middle; margin-left: 4px;">
-                <path d="M21 17H3V5h18m0-2H3c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h6l-2 2v1h10v-1l-2-2h6c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z"></path>
-              </svg>
-              ${match.channel}
-            </span>
-          </div>
-        `;
-        button.addEventListener('click', () => window.location.href = match.link);
-        container.appendChild(button);
-      });
-    }
+        function convertToLocalTime(meccaTime) {
+            const date = getMatchDate(meccaTime);
+            return date.toLocaleTimeString('ar-AR', {
+                timeZone: userTimezone,
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: true
+            });
+        }
 
-    setInterval(() => {
-      const now = new Date();
-      document.querySelectorAll('.match-button').forEach((button, index) => {
-        const match = matches[index];
-        const matchStart = getMatchDate(match.meccaTime);
-        const matchEnd = new Date(matchStart.getTime() + 2 * 60 * 60 * 1000);
-        let displayTime = `🕒 ${convertToLocalTime(match.meccaTime)} (توقيتك المحلي)`;
-        if (now >= matchStart && now < matchEnd) displayTime = 'جارية الآن';
-        else if (now >= matchEnd) displayTime = 'إنتهت المباراة';
-        button.querySelector('.time').textContent = displayTime;
-      });
-    }, 60000);
+        function getStatus(match) {
+            const now = new Date();
+            const start = getMatchDate(match.meccaTime);
+            const end = new Date(start.getTime() + 2 * 60 * 60 * 1000);
+            if (now >= start && now < end) return 'live';
+            if (now >= end) return 'ended';
+            return 'upcoming';
+        }
 
-    window.addEventListener("load", function () {
-      document.body.style.opacity = "1";
-    });
+        // ===== RENDER =====
+        function createMatchElements() {
+            const container = document.getElementById('matchesContainer');
+            const now = new Date();
 
-    document.addEventListener('contextmenu', e => e.preventDefault());
-    document.addEventListener('copy', e => e.preventDefault());
-    document.addEventListener('selectstart', e => e.preventDefault());
-  </script>
+            const upcoming = [],
+                live = [],
+                ended = [];
+
+            matches.forEach(m => {
+                const status = getStatus(m);
+                if (status === 'live') live.push(m);
+                else if (status === 'ended') ended.push(m);
+                else upcoming.push(m);
+            });
+
+            const sortByDate = arr => arr.sort((a, b) => getMatchDate(a.meccaTime) - getMatchDate(b.meccaTime));
+            const sorted = [...sortByDate(live), ...sortByDate(upcoming), ...sortByDate(ended)];
+
+            if (sorted.length === 0) {
+                container.innerHTML = `<div class="empty-state">لا توجد مباريات اليوم</div>`;
+                return;
+            }
+
+            sorted.forEach((match, index) => {
+                const button = document.createElement('button');
+                button.className = 'match-button';
+
+                const status = getStatus(match);
+                const localTime = convertToLocalTime(match.meccaTime);
+
+                let timeLabel = `🕒 ${localTime}`;
+                let timeClass = 'time';
+                if (status === 'live') {
+                    timeLabel = 'جارية الآن';
+                    timeClass += ' live';
+                } else if (status === 'ended') {
+                    timeLabel = 'انتهت المباراة';
+                    timeClass += ' ended';
+                }
+
+                button.innerHTML = `
+                    <div class="teams">${match.teams}</div>
+                    <div class="details">
+                        <span class="${timeClass}">${timeLabel}</span>
+                        <span class="channel">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="15" height="15">
+                                <path d="M21 17H3V5h18m0-2H3c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h6l-2 2v1h10v-1l-2-2h6c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z"/>
+                            </svg>
+                            ${match.channel}
+                        </span>
+                    </div>
+                `;
+
+                // 🔥 فتح الرابط في نافذة جديدة (يدعم http و https)
+                button.addEventListener('click', () => {
+                    window.open(match.link, '_blank');
+                });
+
+                container.appendChild(button);
+
+                if (index < sorted.length - 1) {
+                    const div = document.createElement('div');
+                    div.className = 'match-divider';
+                    container.appendChild(div);
+                }
+            });
+        }
+
+        // ===== LIVE UPDATE =====
+        setInterval(() => {
+            const now = new Date();
+            const buttons = document.querySelectorAll('.match-button');
+            matches.forEach((match, i) => {
+                if (i >= buttons.length) return;
+                const status = getStatus(match);
+                const timeEl = buttons[i].querySelector('.time');
+                if (!timeEl) return;
+
+                let label = `🕒 ${convertToLocalTime(match.meccaTime)}`;
+                let cls = 'time';
+                if (status === 'live') {
+                    label = 'جارية الآن';
+                    cls += ' live';
+                } else if (status === 'ended') {
+                    label = 'انتهت المباراة';
+                    cls += ' ended';
+                }
+                timeEl.textContent = label;
+                timeEl.className = cls;
+            });
+        }, 60000);
+
+        // ===== FADE IN =====
+        window.addEventListener('load', function() {
+            document.body.classList.add('loaded');
+        });
+
+        // ===== PREVENT CONTEXT MENU / COPY =====
+        document.addEventListener('contextmenu', e => e.preventDefault());
+        document.addEventListener('copy', e => e.preventDefault());
+        document.addEventListener('selectstart', e => e.preventDefault());
+    </script>
 </body>
 </html>
