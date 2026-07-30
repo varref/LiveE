@@ -18,14 +18,18 @@
             opacity: 0;
             transition: opacity 1.2s ease;
             font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
-            background-color: #0b0b0b;
-            padding: 24px 16px 100px 16px;
+            background-color: #000000;
+            /* خلفية سوداء خالصة */
             min-height: 100vh;
             display: flex;
             flex-direction: column;
+            justify-content: center;
+            /* توسيط رأسي */
             align-items: center;
-            justify-content: flex-start;
+            /* توسيط أفقي */
+            padding: 20px 16px 100px 16px;
             user-select: none;
+            margin: 0;
         }
 
         /* ===== SCROLLBAR ===== */
@@ -33,10 +37,10 @@
             width: 6px;
         }
         ::-webkit-scrollbar-track {
-            background: #141414;
+            background: #0a0a0a;
         }
         ::-webkit-scrollbar-thumb {
-            background: #3a3a3a;
+            background: #333;
             border-radius: 12px;
         }
         ::-webkit-scrollbar-thumb:hover {
@@ -51,12 +55,16 @@
             gap: 16px;
             width: 100%;
             max-width: 560px;
+            max-height: calc(100vh - 140px);
+            overflow-y: auto;
+            padding: 4px 0;
             margin: 0 auto;
+            /* إزالة أي مسافات علوية */
         }
 
         /* ===== MATCH CARD ===== */
         .match-button {
-            background: #121212;
+            background: #141414;
             color: #f0f0f0;
             border: 1px solid #2a2a2a;
             border-radius: 16px;
@@ -66,7 +74,7 @@
             text-align: right;
             position: relative;
             overflow: hidden;
-            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.6);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.8);
             backdrop-filter: blur(2px);
             width: 100%;
             margin: 0 auto;
@@ -77,7 +85,7 @@
             position: absolute;
             inset: 0;
             border-radius: 16px;
-            background: linear-gradient(135deg, rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0.01));
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.01));
             opacity: 0;
             transition: opacity 0.4s ease;
             pointer-events: none;
@@ -90,12 +98,12 @@
         .match-button:hover {
             transform: translateY(-3px);
             border-color: #555;
-            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(255, 255, 255, 0.04);
-            background: #181818;
+            box-shadow: 0 12px 36px rgba(0, 0, 0, 0.9), 0 0 0 1px rgba(255, 255, 255, 0.05);
+            background: #1c1c1c;
         }
 
         .match-button:active {
-            transform: scale(0.98);
+            transform: scale(0.97);
             transition-duration: 0.08s;
         }
 
@@ -137,7 +145,7 @@
         .time.live {
             color: #ffffff;
             border-color: #555;
-            background: rgba(255, 255, 255, 0.07);
+            background: rgba(255, 255, 255, 0.08);
             font-weight: 500;
         }
 
@@ -159,7 +167,7 @@
                 transform: scale(1);
             }
             50% {
-                opacity: 0.25;
+                opacity: 0.2;
                 transform: scale(0.6);
             }
         }
@@ -200,7 +208,7 @@
             max-width: 400px;
             height: 1px;
             background: linear-gradient(90deg, transparent, #2a2a2a, transparent);
-            margin: 4px auto 6px auto;
+            margin: 2px auto 4px auto;
         }
 
         /* ===== HOME BUTTON ===== */
@@ -216,17 +224,18 @@
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            box-shadow: 0 8px 18px rgba(0, 0, 0, 0.6);
+            box-shadow: 0 8px 18px rgba(0, 0, 0, 0.7);
             z-index: 1100;
             transition: all 0.25s ease;
-            background-color: rgba(10, 10, 10, 0.9);
+            background-color: rgba(10, 10, 10, 0.92);
+            backdrop-filter: blur(4px);
         }
 
         .home-button:hover {
             background: #1f1f1f;
             border-color: #fff;
             transform: scale(1.02);
-            box-shadow: 0 10px 24px black;
+            box-shadow: 0 10px 28px black;
         }
 
         .home-button:active {
@@ -264,7 +273,8 @@
 
             .match-container {
                 max-width: 100%;
-                padding: 0 8px;
+                padding: 0 4px;
+                max-height: calc(100vh - 120px);
             }
 
             .match-button {
@@ -358,6 +368,9 @@
             channel: 'الشارقة الرياضية',
             link: 'http://xlion.net:8080/15034094901029/18800196589372/141797'
         }
+        
+        
+        // أضف المزيد من المباريات هنا عند الحاجة
         ];
 
         // ===== TIMEZONE DETECTION =====
@@ -441,19 +454,19 @@
                 }
 
                 button.innerHTML = `
-                    <div class="teams">${match.teams}</div>
-                    <div class="details">
-                        <span class="${timeClass}">${timeLabel}</span>
-                        <span class="channel">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="15" height="15">
-                                <path d="M21 17H3V5h18m0-2H3c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h6l-2 2v1h10v-1l-2-2h6c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z"/>
-                            </svg>
-                            ${match.channel}
-                        </span>
-                    </div>
-                `;
+                        <div class="teams">${match.teams}</div>
+                        <div class="details">
+                            <span class="${timeClass}">${timeLabel}</span>
+                            <span class="channel">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="15" height="15">
+                                    <path d="M21 17H3V5h18m0-2H3c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h6l-2 2v1h10v-1l-2-2h6c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z"/>
+                                </svg>
+                                ${match.channel}
+                            </span>
+                        </div>
+                    `;
 
-                // 🔥 فتح الرابط في نافذة جديدة (يدعم http و https)
+                // فتح الرابط في نافذة جديدة
                 button.addEventListener('click', () => {
                     window.open(match.link, '_blank');
                 });
@@ -470,7 +483,6 @@
 
         // ===== LIVE UPDATE =====
         setInterval(() => {
-            const now = new Date();
             const buttons = document.querySelectorAll('.match-button');
             matches.forEach((match, i) => {
                 if (i >= buttons.length) return;
