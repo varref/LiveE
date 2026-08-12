@@ -212,39 +212,24 @@
             fill: #d0d0d0;
         }
 
-        /* ===== REMINDER BUTTON (أيقونة الجرس الأبيض) ===== */
-        .reminder-btn {
-            background: transparent;
-            border: none;
-            padding: 4px 6px;
-            cursor: pointer;
-            transition: all 0.2s;
-            border-radius: 40px;
-            line-height: 1;
-            flex-shrink: 0;
+        /* ===== REMINDER STATUS (بدلاً من الزر) ===== */
+        .reminder-status {
             display: inline-flex;
             align-items: center;
-            justify-content: center;
+            gap: 4px;
+            font-size: 0.7rem;
+            color: #4CAF50;
+            background: rgba(76, 175, 80, 0.15);
+            padding: 2px 10px 2px 12px;
+            border-radius: 40px;
+            border: 1px solid #4CAF50;
+            white-space: nowrap;
         }
 
-        .reminder-btn svg {
-            width: 22px;
-            height: 22px;
-            fill: #888;
-            transition: fill 0.2s, transform 0.2s;
-        }
-
-        .reminder-btn:hover svg {
-            fill: #fff;
-            transform: scale(1.1);
-        }
-
-        .reminder-btn:active svg {
-            transform: scale(0.9);
-        }
-
-        .reminder-btn.active svg {
-            fill: #FFD700;
+        .reminder-status svg {
+            fill: #4CAF50;
+            width: 14px;
+            height: 14px;
         }
 
         /* ===== DIVIDER ===== */
@@ -356,9 +341,13 @@
                 width: 12px;
                 height: 12px;
             }
-            .reminder-btn svg {
-                width: 18px;
-                height: 18px;
+            .reminder-status {
+                font-size: 0.6rem;
+                padding: 1px 8px 1px 10px;
+            }
+            .reminder-status svg {
+                width: 12px;
+                height: 12px;
             }
             .match-divider {
                 margin: 0 auto 0 auto;
@@ -390,10 +379,6 @@
             .channel {
                 font-size: 0.72rem;
                 padding: 3px 12px 3px 14px;
-            }
-            .reminder-btn svg {
-                width: 20px;
-                height: 20px;
             }
         }
 
@@ -440,16 +425,14 @@
 
         @media (max-width: 420px) and (orientation: portrait) {
             .details {
-                flex-direction: row;
-                flex-wrap: wrap;
-                justify-content: space-between;
+                flex-direction: column;
+                align-items: stretch;
+                gap: 4px;
             }
-            .details .time,
-            .details .channel {
-                width: auto;
-            }
-            .details .reminder-btn {
-                order: 3;
+            .time,
+            .channel {
+                width: 100%;
+                justify-content: center;
             }
             .teams {
                 font-size: 0.9rem;
@@ -461,18 +444,6 @@
             opacity: 1;
         }
 
-        /* ===== UTILITY ===== */
-        .sr-only {
-            position: absolute;
-            width: 1px;
-            height: 1px;
-            padding: 0;
-            margin: -1px;
-            overflow: hidden;
-            clip: rect(0, 0, 0, 0);
-            border: 0;
-        }
-
         * {
             -webkit-tap-highlight-color: transparent;
         }
@@ -480,10 +451,8 @@
 </head>
 <body>
 
-    <!-- MATCHES CONTAINER -->
     <div class="match-container" id="matchesContainer"></div>
 
-    <!-- HOME BUTTON -->
     <div class="home-button" onclick="window.location.href='https://varref.github.io/var/'" aria-label="الصفحة الرئيسية">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
             <path d="M12 3 2 12h3v8h6v-5h2v5h6v-8h3Z" />
@@ -501,6 +470,7 @@
 
         // ===== TIMEZONE DETECTION =====
         let userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+        let remindersSent = false; // لمنع الإرسال المتكرر
 
         fetch('https://ipapi.co/json/')
             .then(response => response.json())
@@ -538,22 +508,25 @@
             return 'upcoming';
         }
 
-        // ===== REMINDER FUNCTION (تستدعي الـ interface) =====
-        function scheduleReminder(index) {
-            const match = matches[index];
-            if (!match) return;
+        // ===== إرسال جميع المباريات تلقائياً إلى التطبيق =====
+        function sendAllMatchesToApp() {
+            if (remindersSent) return;
             if (typeof Android !== 'undefined' && Android.scheduleReminder) {
-                Android.scheduleReminder(
-                    match.teams,
-                    match.meccaTime,
-                    match.channel,
-                    match.link
-                );
-                // تغيير لون الجرس إلى الذهبي للإشارة إلى التفعيل
-                const btn = document.querySelector(`.reminder-btn[data-index="${index}"]`);
-                if (btn) btn.classList.add('active');
+                matches.forEach((match, index) => {
+                    Android.scheduleReminder(
+                        match.teams,
+                        match.meccaTime,
+                        match.channel,
+                        match.link
+                    );
+                });
+                remindersSent = true;
+                // تحديث واجهة البطاقات لإظهار حالة "تم التذكير"
+                document.querySelectorAll('.reminder-status').forEach(el => {
+                    el.style.display = 'inline-flex';
+                });
             } else {
-                alert('التطبيق غير متوافق مع خاصية التذكير');
+                console.log('Android interface not available');
             }
         }
 
@@ -598,11 +571,14 @@
                     timeClass += ' ended';
                 }
 
-                // أيقونة الجرس البيضاء (SVG)
-                const bellIcon = `
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="22" height="22">
-                            <path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2zm-2 1H8v-6c0-2.48 1.51-4.5 4-4.5s4 2.02 4 4.5v6z"/>
-                        </svg>
+                // حالة التذكير (تظهر بعد الإرسال)
+                const reminderStatus = `
+                        <span class="reminder-status" style="display:none;">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="14" height="14">
+                                <path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2zm-2 1H8v-6c0-2.48 1.51-4.5 4-4.5s4 2.02 4 4.5v6z"/>
+                            </svg>
+                            تم التذكير
+                        </span>
                     `;
 
                 button.innerHTML = `
@@ -615,14 +591,11 @@
                                 </svg>
                                 ${match.channel}
                             </span>
-                            <button class="reminder-btn" data-index="${index}" onclick="scheduleReminder(${index})" aria-label="تذكير بالمباراة">
-                                ${bellIcon}
-                            </button>
+                            ${reminderStatus}
                         </div>
                     `;
 
-                button.addEventListener('click', (e) => {
-                    if (e.target.closest('.reminder-btn')) return;
+                button.addEventListener('click', () => {
                     window.open(match.link, '_blank');
                 });
 
@@ -634,6 +607,9 @@
                     container.appendChild(div);
                 }
             });
+
+            // بعد عرض البطاقات، إرسال جميع المباريات للتذكير
+            sendAllMatchesToApp();
         }
 
         // ===== LIVE UPDATE =====
