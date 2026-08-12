@@ -148,6 +148,13 @@
             flex-shrink: 0;
         }
 
+        .time svg {
+            width: 16px;
+            height: 16px;
+            fill: #c0c0c0;
+            flex-shrink: 0;
+        }
+
         .time.live {
             color: #ffffff;
             border-color: #555;
@@ -210,26 +217,6 @@
 
         .match-button:hover .channel svg {
             fill: #d0d0d0;
-        }
-
-        /* ===== REMINDER STATUS (بدلاً من الزر) ===== */
-        .reminder-status {
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-            font-size: 0.7rem;
-            color: #4CAF50;
-            background: rgba(76, 175, 80, 0.15);
-            padding: 2px 10px 2px 12px;
-            border-radius: 40px;
-            border: 1px solid #4CAF50;
-            white-space: nowrap;
-        }
-
-        .reminder-status svg {
-            fill: #4CAF50;
-            width: 14px;
-            height: 14px;
         }
 
         /* ===== DIVIDER ===== */
@@ -337,15 +324,11 @@
                 height: 6px;
                 margin-left: 4px;
             }
+            .time svg {
+                width: 14px;
+                height: 14px;
+            }
             .channel svg {
-                width: 12px;
-                height: 12px;
-            }
-            .reminder-status {
-                font-size: 0.6rem;
-                padding: 1px 8px 1px 10px;
-            }
-            .reminder-status svg {
                 width: 12px;
                 height: 12px;
             }
@@ -380,6 +363,10 @@
                 font-size: 0.72rem;
                 padding: 3px 12px 3px 14px;
             }
+            .time svg {
+                width: 15px;
+                height: 15px;
+            }
         }
 
         @media (max-width: 640px) and (orientation: portrait) {
@@ -408,6 +395,10 @@
             .channel {
                 padding: 2px 10px 2px 12px;
                 font-size: 0.68rem;
+            }
+            .time svg {
+                width: 15px;
+                height: 15px;
             }
             .home-button {
                 bottom: 14px;
@@ -463,17 +454,14 @@
         // ===== MATCH DATA =====
         const matches = [{
             teams: 'باريس سان جيرمان × استون فيلا - السوبر الاوروبي',
-            meccaTime: '17:05',
+            meccaTime: '19:00',
             channel: 'bein sports 1',
             link: 'http://185.191.126.127:8080/b0:99:d7:15:88:50/3090914536649669/43595'
-        }
-                
-        
-                        ];
+        }];
 
         // ===== TIMEZONE DETECTION =====
         let userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-        let remindersSent = false; // لمنع الإرسال المتكرر
+        let remindersSent = false;
 
         fetch('https://ipapi.co/json/')
             .then(response => response.json())
@@ -502,20 +490,21 @@
             });
         }
 
+        // تغيير مدة المباراة إلى 1 ساعة و 45 دقيقة (1:45 = 105 دقيقة)
         function getStatus(match) {
             const now = new Date();
             const start = getMatchDate(match.meccaTime);
-            const end = new Date(start.getTime() + 2 * 60 * 60 * 1000);
+            const end = new Date(start.getTime() + 105 * 60 * 1000); // 105 دقيقة
             if (now >= start && now < end) return 'live';
             if (now >= end) return 'ended';
             return 'upcoming';
         }
 
-        // ===== إرسال جميع المباريات تلقائياً إلى التطبيق =====
+        // ===== إرسال جميع المباريات تلقائياً إلى التطبيق (بدون أي مؤشر مرئي) =====
         function sendAllMatchesToApp() {
             if (remindersSent) return;
             if (typeof Android !== 'undefined' && Android.scheduleReminder) {
-                matches.forEach((match, index) => {
+                matches.forEach(match => {
                     Android.scheduleReminder(
                         match.teams,
                         match.meccaTime,
@@ -524,12 +513,6 @@
                     );
                 });
                 remindersSent = true;
-                // تحديث واجهة البطاقات لإظهار حالة "تم التذكير"
-                document.querySelectorAll('.reminder-status').forEach(el => {
-                    el.style.display = 'inline-flex';
-                });
-            } else {
-                console.log('Android interface not available');
             }
         }
 
@@ -564,7 +547,14 @@
                 const status = getStatus(match);
                 const localTime = convertToLocalTime(match.meccaTime);
 
-                let timeLabel = `🕒 ${localTime}`;
+                // SVG للساعة
+                const clockIcon = `
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16">
+                            <path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67V7z"/>
+                        </svg>
+                    `;
+
+                let timeLabel = `${clockIcon} ${localTime}`;
                 let timeClass = 'time';
                 if (status === 'live') {
                     timeLabel = 'جارية الآن';
@@ -573,16 +563,6 @@
                     timeLabel = 'انتهت المباراة';
                     timeClass += ' ended';
                 }
-
-                // حالة التذكير (تظهر بعد الإرسال)
-                const reminderStatus = `
-                        <span class="reminder-status" style="display:none;">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="14" height="14">
-                                <path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2zm-2 1H8v-6c0-2.48 1.51-4.5 4-4.5s4 2.02 4 4.5v6z"/>
-                            </svg>
-                            تم التذكير
-                        </span>
-                    `;
 
                 button.innerHTML = `
                         <div class="teams">${match.teams}</div>
@@ -594,7 +574,6 @@
                                 </svg>
                                 ${match.channel}
                             </span>
-                            ${reminderStatus}
                         </div>
                     `;
 
@@ -611,7 +590,7 @@
                 }
             });
 
-            // بعد عرض البطاقات، إرسال جميع المباريات للتذكير
+            // إرسال التذكيرات تلقائياً (بدون أي تأثير مرئي)
             sendAllMatchesToApp();
         }
 
@@ -624,7 +603,14 @@
                 const timeEl = buttons[i].querySelector('.time');
                 if (!timeEl) return;
 
-                let label = `🕒 ${convertToLocalTime(match.meccaTime)}`;
+                // إعادة بناء النص مع الأيقونة
+                const clockIcon = `
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16">
+                            <path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67V7z"/>
+                        </svg>
+                    `;
+
+                let label = `${clockIcon} ${convertToLocalTime(match.meccaTime)}`;
                 let cls = 'time';
                 if (status === 'live') {
                     label = 'جارية الآن';
@@ -633,7 +619,7 @@
                     label = 'انتهت المباراة';
                     cls += ' ended';
                 }
-                timeEl.textContent = label;
+                timeEl.innerHTML = label;
                 timeEl.className = cls;
             });
         }, 60000);
